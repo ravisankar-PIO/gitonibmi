@@ -1,6 +1,4 @@
 # gitonibmi
 A repository to connect the GitHub with IBMi
 
-## added  a line via IBMi
-
-## added another line via nano
+## added  a line via VSCode
