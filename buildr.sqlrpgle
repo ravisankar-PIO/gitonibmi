@@ -8,5 +8,5 @@ count += 1;
 note = 'Build# ' + %char(count);
 
 exec sql INSERT INTO ravi.buildpf (note) VALUES (:note);
-
+eval count = count;
 *inlr = *on;  
