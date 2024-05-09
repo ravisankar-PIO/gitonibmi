@@ -34,7 +34,7 @@
      A*%%TS  SD  20230705  085013  RAVISANKAR  REL-V7R4M0  5770-WDS
      A                                      SFLSIZ(0005)
      A                                      SFLPAG(0005)
-     A                                      CF06(06 'Add record')
+     A                                      CF06(06 'Adds record')
      A  31                                  SFLDSP
      A  32                                  SFLDSPCTL
      A  33                                  SFLCLR
