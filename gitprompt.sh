@@ -1,6 +1,6 @@
 # bash/zsh git prompt support
 #
-# 
+# https://raw.githubusercontent.com/ravisankar-PIO/gitonibmi/main/gitprompt.sh
 #
 # This script allows you to see the current branch in your prompt,
 # posh-git style.
