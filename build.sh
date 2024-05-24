@@ -14,7 +14,6 @@
 # Once all the sources are copied, it will compile the objects in correct order.
 # ------------------------------------------------------------------------- #
 # short="${long:0:2}" ; echo "${short}"
-
 # -----------------------------------------------------------
 # Use Present Working Directory.
 # -----------------------------------------------------------
