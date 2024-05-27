@@ -136,6 +136,6 @@ sc start jenkins
 echo -e "\n\n"
 echo -e '|============================================================|'
 echo -e '| Initial setup for Bash Prompt, Git, Service-commander,     |'
-echo -e "|             Jenkins, GitBucket are completed!              |"
+echo -e "|             Jenkins & GitBucket are completed!             |"
 echo -e '|============================================================|'
 echo -e "\n\n"
