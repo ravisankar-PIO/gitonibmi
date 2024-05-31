@@ -79,8 +79,7 @@ yum update -y  && yum upgrade -y
 # ==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==
 # Install GIT
 # ==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==
-printheading "Install GIT..."
-yum install git -y
+printheading "Setup GIT..."
 git config --global user.name 'Ravisankar Pandian' 
 git config --global user.email ravisankar.pandian@programmers.io
 
