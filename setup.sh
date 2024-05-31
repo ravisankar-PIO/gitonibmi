@@ -73,6 +73,7 @@ source ~/.profile
 # Update and upgrade the open source packages
 # ==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==
 printheading "Update the yum repository and existing packages..."
+yum install java-11 git -y
 yum update -y  && yum upgrade -y 
 
 # ==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==

@@ -1,6 +1,6 @@
 name: Jenkins on IBMi
 dir: /home/CECUSER/jenkins
-start_cmd: java -jar '/home/CECUSER/jenkins/jenkins.war' '--httpPort=9095'
+start_cmd: java -DJENKINS_HOME=/home/CECUSER/jenkins_home -jar '/home/CECUSER/jenkins/jenkins.war' '--httpPort=9095'
 check_alive: '9095'
 batch_mode: 'false'
 environment_vars:
