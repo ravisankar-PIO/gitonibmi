@@ -122,13 +122,21 @@ cd ~
 wget --show-progress https://raw.githubusercontent.com/ravisankar-PIO/gitonibmi/main/jenkins.yml
 mv jenkins.yml /QOpenSys/etc/sc/services/jenkins.yml
 
+printheading "Configure the gitbucket yml file..."
+showProgress 10
+cd ~
+wget --show-progress https://raw.githubusercontent.com/ravisankar-PIO/gitonibmi/main/gitbucket.yml
+mv gitbucket.yml /QOpenSys/etc/sc/services/gitbucket.yml
+
 
 # ==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==
-# Copy the Jenkins & GitBucket yml config file
+# Start Jenkins & Gitbucket
 # ==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==
 printheading "Start the Jenkins...."
 sc start jenkins
 
+printheading "Start the Jenkins...."
+sc start gitbucket
 
 # ==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==
 # All done!
