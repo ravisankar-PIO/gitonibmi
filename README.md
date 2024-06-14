@@ -5,3 +5,5 @@ A repository to connect the GitHub with IBMi
 
  
 ## added another line
+- a bullet point
+- another bullet point
