@@ -14,12 +14,12 @@
 // -------------------------------------------------------------------------------------------------
 // Definition of program control statements.
 // -------------------------------------------------------------------------------------------------
-  ctl-opt option(*nodebugio:*srcstmt:*nounref) dftactgrp(*no);
+ctl-opt option(*nodebugio:*srcstmt:*nounref) dftactgrp(*no);
 
 // -------------------------------------------------------------------------------------------------
 // Definition of display file.
 // -------------------------------------------------------------------------------------------------
-  dcl-f itmdtld workstn Indds(screen);
+dcl-f itmdtld workstn Indds(screen);
 
 // -------------------------------------------------------------------------------------------------
 // Definition of Procedure Interface a.k.a input parameters
@@ -35,36 +35,36 @@ end-pi;
 // Definition of Standalone Variables
 // -------------------------------------------------------------------------------------------------
 
-  dcl-ds PgmDs psds qualified;
-    PgmName   *proc;
-    UserName  char(10) pos(254);
-  end-ds;
+dcl-ds PgmDs psds qualified;
+  PgmName   *proc;
+  UserName  char(10) pos(254);
+end-ds;
 
-  dcl-s D1_ITNUM like(D_ITNUM);
-  dcl-s exit_flag char (1) inz('0');
+dcl-s D1_ITNUM like(D_ITNUM);
+dcl-s exit_flag char (1) inz('0');
 
-  dcl-s  S2_Itdesc   char(30) inz;
-  dcl-s  S2_ItPrice  packed(5) inz;
-  dcl-s  S2_ITQty    packed(5) inz;
+dcl-s  S2_Itdesc   char(30) inz;
+dcl-s  S2_ItPrice  packed(5) inz;
+dcl-s  S2_ITQty    packed(5) inz;
 
 // -------------------------------------------------------------------------------------------------
 // Data Structures
 // -------------------------------------------------------------------------------------------------
-  dcl-s p_Indicators pointer inz(%addr(*in));
-  dcl-ds screen qualified based(p_Indicators);
-    exit        ind pos(03);
-    cancel      ind pos(12);
-    protect     ind pos(70);
-    desc_RI     ind pos(71);
-    qty_RI      ind pos(72);
-    price_RI    ind pos(73);
-    error_blink ind pos(74);
-  end-ds;
+dcl-s p_Indicators pointer inz(%addr(*in));
+dcl-ds screen qualified based(p_Indicators);
+  exit        ind pos(03);
+  cancel      ind pos(12);
+  protect     ind pos(70);
+  desc_RI     ind pos(71);
+  qty_RI      ind pos(72);
+  price_RI    ind pos(73);
+  error_blink ind pos(74);
+end-ds;
 // -------------------------------------------------------------------------------------------------
 // Definition of Global Constants
 // -------------------------------------------------------------------------------------------------
-  dcl-c TRUE const('1');
-  dcl-c FALSE const('0');
+dcl-c TRUE const('1');
+dcl-c FALSE const('0');
 // -------------------------------------------------------------------------------------------------
 // Start of the Main logic
 // -------------------------------------------------------------------------------------------------
@@ -175,11 +175,11 @@ dcl-proc process_detail;
       endif;
 
     other;
-    exec sql 
+      exec sql 
       call itmdtl(:D_ITNUM, :D_ITDESC, :D_ITQTY, D_ITPRICE, 
       :PgmDs.UserName, PgmDs.PgmName, :mode, S2_operation_flag);
 
-    endsl;
+  endsl;
 
 
   return (exitFlag);
@@ -211,26 +211,26 @@ dcl-proc move_fields;
       from ITMMASTF where ITNUM = :S2_ITNum;
 
     select;
-    when S2_mode = 'Copy';
-    Mode = 3;
-      exec sql
+      when S2_mode = 'Copy';
+        Mode = 3;
+        exec sql
         select max(itnum)+1 into :D_ITNUM from itmmastf;
-      if D_ITNUM = *zeros;
-        D_ITNUM = 1;
-      endif;
+        if D_ITNUM = *zeros;
+          D_ITNUM = 1;
+        endif;
 
-    when S2_mode = 'Update';
-    Mode = 2; 
-      D_ITNUM    = S2_Itnum;
+      when S2_mode = 'Update';
+        Mode = 2; 
+        D_ITNUM    = S2_Itnum;
 
-    when S2_mode = 'Delete';
-    Mode = 4;
-      D_ITNUM    = S2_Itnum;
+      when S2_mode = 'Delete';
+        Mode = 4;
+        D_ITNUM    = S2_Itnum;
 
-    when S2_mode = 'Display';
-    Mode = 5;
-      D_ITNUM    = S2_Itnum;
-      screen.protect = TRUE;
+      when S2_mode = 'Display';
+        Mode = 5;
+        D_ITNUM    = S2_Itnum;
+        screen.protect = TRUE;
 
     endsl;
   endif;
