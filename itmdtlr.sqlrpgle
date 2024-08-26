@@ -75,11 +75,11 @@ move_fields();
 
 exfmt ITDETAIL;
 
-dow screen.cancel = FALSE and
+dow (screen.cancel = FALSE and
     screen.exit   = FALSE and
-    exit_flag     = FALSE;
+    exit_flag     = FALSE);
 
-  if validate_detail() = TRUE;
+  if (validate_detail() = TRUE);
     exit_flag = process_detail();
   else;
     exfmt ITDETAIL;
@@ -87,11 +87,11 @@ dow screen.cancel = FALSE and
 
 enddo;
 
-if screen.cancel = TRUE;
+if (screen.cancel = TRUE);
   S2_operation_flag = FALSE;
 endif;
 
-if screen.exit = TRUE;
+if (screen.exit = TRUE);
   s2_operation_flag = FALSE;
   s2_exit_flag = TRUE;
 endif;
@@ -114,23 +114,23 @@ dcl-proc validate_detail;
   clear D_ERROR;
 
 
-  if %Trim(s2_mode)   = 'Add' or
+  if (%Trim(s2_mode)   = 'Add' or
      %trim(s2_mode)   = 'Update' or
-     %trim(s2_mode)   = 'Copy';
+     %trim(s2_mode)   = 'Copy');
 
-    if D_ITDESC = *blanks;
+    if (D_ITDESC = *blanks);
       screen.desc_RI = TRUE;
       D_ERROR = 'Item Description cannot be blanks';
       return FALSE;
     endif;
 
-    if D_ITPRICE = *zeros;
+    if (D_ITPRICE = *zeros);
       screen.price_RI = TRUE;
       D_ERROR = 'Item price cannot be zeros';
       return FALSE;
     endif;
 
-    if D_ITQTY = *zeros;
+    if (D_ITQTY = *zeros);
       screen.qty_RI = TRUE;
       D_ERROR = 'Item quantity cannot be zeros';
       return FALSE;
@@ -138,7 +138,7 @@ dcl-proc validate_detail;
 
   endif;
 
-  if D_ERROR = *blanks;
+  if (D_ERROR = *blanks);
     return TRUE;
   endif;
 
@@ -158,12 +158,12 @@ dcl-proc process_detail;
   date_and_time = %timestamp;
 
   select;
-    when S2_mode = 'Delete';
+    when (S2_mode = 'Delete');
       D_Error = 'You are about to delete the record. Hit enter to confirm delete.';
       screen.error_blink = TRUE;
       exfmt ITDETAIL;
 
-      if screen.exit or screen.cancel = TRUE;
+      if (screen.exit or screen.cancel = TRUE);
         S2_operation_flag = FALSE;
         S2_exit_flag = TRUE;
 
@@ -193,11 +193,11 @@ dcl-proc move_fields;
 
   D_PGMNAM = PgmDs.PgmName;
 
-  if S2_mode = 'Add';
+  if (S2_mode = 'Add');
     Mode = 1;
     exec sql
       select max(itnum)+1 into :D_ITNUM from itmmastf;
-    if D_ITNUM = *zeros;
+    if (D_ITNUM = *zeros);
       D_ITNUM = 1;
     endif;
 
@@ -211,23 +211,23 @@ dcl-proc move_fields;
       from ITMMASTF where ITNUM = :S2_ITNum;
 
     select;
-      when S2_mode = 'Copy';
+      when (S2_mode = 'Copy');
         Mode = 3;
         exec sql
         select max(itnum)+1 into :D_ITNUM from itmmastf;
-        if D_ITNUM = *zeros;
+        if (D_ITNUM = *zeros);
           D_ITNUM = 1;
         endif;
 
-      when S2_mode = 'Update';
+      when (S2_mode = 'Update');
         Mode = 2; 
         D_ITNUM    = S2_Itnum;
 
-      when S2_mode = 'Delete';
+      when (S2_mode = 'Delete');
         Mode = 4;
         D_ITNUM    = S2_Itnum;
 
-      when S2_mode = 'Display';
+      when (S2_mode = 'Display');
         Mode = 5;
         D_ITNUM    = S2_Itnum;
         screen.protect = TRUE;
