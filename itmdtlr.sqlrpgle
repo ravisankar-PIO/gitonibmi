@@ -6,7 +6,7 @@
 //                S2_ItNum           Input    Mandatory. Blanks for Add operation.
 //                S2_Operation_Flag  Output   Determines if the operation completed successfully.
 //                S2_Exit_Flag       Output   Determines whether user canceled the operation.
-// Written By   : Ravisankar Pandian
+// Written By   : Ravisankar  Pandian
 // Company.     : Programmers.IO
 // Date         : 19-07-2023
 // -------------------------------------------------------------------------------------------------
@@ -144,7 +144,7 @@ dcl-proc validate_detail;
 
 end-proc;
 
-
+//after
 // -------------------------------------------------------------------------------------------------
 // Process the detail screen
 // -------------------------------------------------------------------------------------------------
