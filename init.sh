@@ -55,11 +55,7 @@ showProgress 10
 cd ~
 
 ## set Open source packages' path
-echo "export PATH=/QOpenSys/pkgs/bin:$PATH" >> .profile 
-
-## set Java V17's path.
-echo "export PATH=/QOpenSys/QIBM/ProdData/JavaVM/jdk17/64bit/bin:$PATH" >> .profile 
-
+echo "export PATH=/QOpenSys/QIBM/ProdData/JavaVM/jdk17/64bit/bin:/QOpenSys/pkgs/bin:$PATH" >> .profile
 # echo "export JAVA_HOME=/QOpenSys/pkgs/lib/jvm/openjdk-11" >> .profile
 echo "export JENKINS_HOME=/home/$USER/jenkins_home" >> .profile
 # echo "export GITBUCKET_HOME=/home/$USER/gitbucket_home" >> .profile
