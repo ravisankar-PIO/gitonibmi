@@ -4,6 +4,5 @@ start_cmd: java -DJENKINS_HOME=/home/CECUSER/jenkins_home -jar '/home/CECUSER/je
 check_alive: '9095'
 batch_mode: 'false'
 environment_vars:
-- PATH=/QOpenSys/pkgs/bin:/QOpenSys/usr/bin:/usr/ccs/bin:/QOpenSys/usr/bin/X11:/usr/sbin:.:/usr/bin
-- JAVA_HOME=/QOpenSys/pkgs/lib/jvm/openjdk-11
+- PATH=/QOpenSys/QIBM/ProdData/JavaVM/jdk17/64bit/bin:/QOpenSys/pkgs/bin:/QOpenSys/usr/bin:/usr/ccs/bin:/QOpenSys/usr/bin/X11:/usr/sbin:.:/usr/bin
 - JENKINS_HOME=/home/CECUSER/jenkins_home
