@@ -1,7 +1,3 @@
 Initial Commit.
 
-4th commit
-Lorem ipsum dolor sit 
-Lorem ipsum dolor sit 
-Lorem ipsum dolor sit 
-Lorem ipsum dolor sit 
+5th commit
