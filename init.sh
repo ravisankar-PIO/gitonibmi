@@ -147,6 +147,7 @@ sc start jenkins
 # ==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==
 printheading "Install Better Object Builder..."
 cd ~
+yum install ibmi-repos -y
 yum install bob -y
 
 
@@ -155,23 +156,34 @@ yum install bob -y
 # Create User Profiles and libraries
 # ==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==
 # Create the user libraries first
+printheading "Create User Libraries..."
 cl CRTLIB RAHUL 
 cl CRTLIB AVADHOOT
 cl CRTLIB DEVOPSLIB
 
 # Create a job description to put these libraries into library list
+printheading "Create JOBD to setup the library list..."
+echo "CRTJOBD JOBD(QGPL/PROGRAMMER) TEXT('Job Description for Developers') INLLIBL(DEVOPSLIB RAHUL AVADHOOT RAVI QGPL QTEMP)"
 cl "CRTJOBD JOBD(QGPL/PROGRAMMER) TEXT('Job Description for Developers') INLLIBL(DEVOPSLIB RAHUL AVADHOOT RAVI QGPL QTEMP)"
 
 # Then create the user profiles and attach the JOBD to them
+printheading "Create user profiles..."
+echo "CRTUSRPRF USRPRF(RAVI) PASSWORD(WELCOME) USRCLS(*SECOFR) CURLIB(RAVI) TEXT('Developers Profile') JOBD(PROGRAMMER)"
 cl "CRTUSRPRF USRPRF(RAVI) PASSWORD(WELCOME) USRCLS(*SECOFR) CURLIB(RAVI) TEXT('Developers Profile') JOBD(PROGRAMMER)"
+
+echo "CRTUSRPRF USRPRF(RAHUL) PASSWORD(WELCOME) USRCLS(*SECOFR) CURLIB(RAHUL) TEXT('Developers Profile') JOBD(PROGRAMMER)"
 cl "CRTUSRPRF USRPRF(RAHUL) PASSWORD(WELCOME) USRCLS(*SECOFR) CURLIB(RAHUL) TEXT('Developers Profile') JOBD(PROGRAMMER)"
+
+echo "CRTUSRPRF USRPRF(AVADHOOT) PASSWORD(WELCOME) USRCLS(*SECOFR) CURLIB(AVADHOOT) TEXT('Developers Profile') JOBD(PROGRAMMER)"
 cl "CRTUSRPRF USRPRF(AVADHOOT) PASSWORD(WELCOME) USRCLS(*SECOFR) CURLIB(AVADHOOT) TEXT('Developers Profile') JOBD(PROGRAMMER)"
 
+printheading "Setup the .ssh folder for the users..."
 mkdir /home/ravi/.ssh/ -p 
 cd /home/ravi/.ssh
 wget --show-progress https://raw.githubusercontent.com/ravisankar-PIO/gitonibmi/main/id_ed25519
 wget --show-progress https://raw.githubusercontent.com/ravisankar-PIO/gitonibmi/main/id_ed25519.pub
-echo "export PATH=/QOpenSys/QIBM/ProdData/JavaVM/jdk17/64bit/bin:/QOpenSys/pkgs/bin:$PATH" >> .profile
+cd .. && echo "export PATH=/QOpenSys/QIBM/ProdData/JavaVM/jdk17/64bit/bin:/QOpenSys/pkgs/bin:$PATH" >> .profile
+echo "PROMPT_COMMAND='__posh_git_ps1 \"\${VIRTUAL_ENV:+(\`basename \$VIRTUAL_ENV\`)}\\[\\e[32m\\]\\u\\[\\e[0m\\]@\\h:\\[\\e[33m\\]\\w\\[\\e[0m\\] \" \"\\\\\\\$ \";'\$PROMPT_COMMAND" >> .profile
 echo "source /home/$current_user/.gitprompt.sh" >> .profile
 
 
@@ -179,14 +191,17 @@ mkdir /home/rahul/.ssh/ -p
 cd /home/rahul/.ssh
 wget --show-progress https://raw.githubusercontent.com/ravisankar-PIO/gitonibmi/main/id_ed25519
 wget --show-progress https://raw.githubusercontent.com/ravisankar-PIO/gitonibmi/main/id_ed25519.pub
-echo "export PATH=/QOpenSys/QIBM/ProdData/JavaVM/jdk17/64bit/bin:/QOpenSys/pkgs/bin:$PATH" >> .profile
+cd .. && echo "export PATH=/QOpenSys/QIBM/ProdData/JavaVM/jdk17/64bit/bin:/QOpenSys/pkgs/bin:$PATH" >> .profile
+echo "PROMPT_COMMAND='__posh_git_ps1 \"\${VIRTUAL_ENV:+(\`basename \$VIRTUAL_ENV\`)}\\[\\e[32m\\]\\u\\[\\e[0m\\]@\\h:\\[\\e[33m\\]\\w\\[\\e[0m\\] \" \"\\\\\\\$ \";'\$PROMPT_COMMAND" >> .profile
 echo "source /home/$current_user/.gitprompt.sh" >> .profile
+
 
 mkdir /home/avadhoot/.ssh/ -p 
 cd /home/avadhoot/.ssh
 wget --show-progress https://raw.githubusercontent.com/ravisankar-PIO/gitonibmi/main/id_ed25519
 wget --show-progress https://raw.githubusercontent.com/ravisankar-PIO/gitonibmi/main/id_ed25519.pub
-echo "export PATH=/QOpenSys/QIBM/ProdData/JavaVM/jdk17/64bit/bin:/QOpenSys/pkgs/bin:$PATH" >> .profile
+cd .. && echo "export PATH=/QOpenSys/QIBM/ProdData/JavaVM/jdk17/64bit/bin:/QOpenSys/pkgs/bin:$PATH" >> .profile
+echo "PROMPT_COMMAND='__posh_git_ps1 \"\${VIRTUAL_ENV:+(\`basename \$VIRTUAL_ENV\`)}\\[\\e[32m\\]\\u\\[\\e[0m\\]@\\h:\\[\\e[33m\\]\\w\\[\\e[0m\\] \" \"\\\\\\\$ \";'\$PROMPT_COMMAND" >> .profile
 echo "source /home/$current_user/.gitprompt.sh" >> .profile
 
 # ==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==
