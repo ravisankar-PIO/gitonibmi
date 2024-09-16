@@ -39,13 +39,16 @@ printheading(){
     echo "==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-=="
 }
 
+
+
 # ==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==
 #                  MAIN LOGIC # ==-==-==-==-==-==-==-==-==-==-==-==-==-==
 # ==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==
-
 # Set bash as the default shell.
 /QOpenSys/pkgs/bin/chsh -s /QOpenSys/pkgs/bin/bash $USER
 printheading "Changed the default shell to bash..."
+
+
 
 # ==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==
 # create a .profile file in your home folder to store the environment variables.
@@ -61,6 +64,8 @@ echo "export JENKINS_HOME=/home/$USER/jenkins_home" >> .profile
 # echo "export GITBUCKET_HOME=/home/$USER/gitbucket_home" >> .profile
 source ~/.profile
 
+
+
 # ==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==
 # Change the Prompt String to reflect Git Status.
 # ==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==
@@ -71,13 +76,16 @@ echo "PROMPT_COMMAND='__posh_git_ps1 \"\${VIRTUAL_ENV:+(\`basename \$VIRTUAL_ENV
 echo "source ~/.gitprompt.sh" >> .profile
 source ~/.profile
 
+
+
 # ==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==
 # Install GIT
 # ==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==
 printheading "Setup GIT..."
 yum install git -y
-git config --global user.name 'Ravisankar Pandian' 
-git config --global user.email ravisankar.pandian@programmers.io
+
+
+
 
 # ==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==
 # Retrieve SSH Keys from GitOnIBMi Repo
@@ -89,6 +97,8 @@ printheading "Retrieve SSH Keypairs..."
 wget --show-progress https://raw.githubusercontent.com/ravisankar-PIO/gitonibmi/main/id_ed25519
 wget --show-progress https://raw.githubusercontent.com/ravisankar-PIO/gitonibmi/main/id_ed25519.pub
 
+
+
 # ==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==
 # Download Jenkins
 # ==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==
@@ -98,11 +108,15 @@ cd ~/jenkins
 printheading "Download Jenkins..."
 wget --show-progress http://mirrors.jenkins.io/war-stable/latest/jenkins.war
 
+
+
 # ==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==
 # Install Service Commander
 # ==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==
 printheading "Install Service Commander..."
 yum install service-commander -y
+
+
 
 # ==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==
 # Copy the Jenkins yml config file
@@ -121,10 +135,59 @@ rm jenkins.yml
 
 
 # ==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==
-# Start Jenkins & Gitbucket
+# Start Jenkins via SC
 # ==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==
 printheading "Start the Jenkins...."
 sc start jenkins
+
+
+
+# ==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==
+# Install BOB
+# ==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==
+printheading "Install Better Object Builder..."
+cd ~
+yum install bob -y
+
+
+
+# ==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==
+# Create User Profiles and libraries
+# ==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==
+# Create the user libraries first
+cl CRTLIB RAHUL 
+cl CRTLIB AVADHOOT
+cl CRTLIB DEVOPSLIB
+
+# Create a job description to put these libraries into library list
+cl "CRTJOBD JOBD(QGPL/PROGRAMMER) TEXT('Job Description for Developers') INLLIBL(DEVOPSLIB RAHUL AVADHOOT RAVI QGPL QTEMP)"
+
+# Then create the user profiles and attach the JOBD to them
+cl "CRTUSRPRF USRPRF(RAVI) PASSWORD(WELCOME) USRCLS(*SECOFR) CURLIB(RAVI) TEXT('Developers Profile') JOBD(PROGRAMMER)"
+cl "CRTUSRPRF USRPRF(RAHUL) PASSWORD(WELCOME) USRCLS(*SECOFR) CURLIB(RAHUL) TEXT('Developers Profile') JOBD(PROGRAMMER)"
+cl "CRTUSRPRF USRPRF(AVADHOOT) PASSWORD(WELCOME) USRCLS(*SECOFR) CURLIB(AVADHOOT) TEXT('Developers Profile') JOBD(PROGRAMMER)"
+
+mkdir /home/ravi/.ssh/ -p 
+cd /home/ravi/.ssh
+wget --show-progress https://raw.githubusercontent.com/ravisankar-PIO/gitonibmi/main/id_ed25519
+wget --show-progress https://raw.githubusercontent.com/ravisankar-PIO/gitonibmi/main/id_ed25519.pub
+echo "export PATH=/QOpenSys/QIBM/ProdData/JavaVM/jdk17/64bit/bin:/QOpenSys/pkgs/bin:$PATH" >> .profile
+echo "source /home/$current_user/.gitprompt.sh" >> .profile
+
+
+mkdir /home/rahul/.ssh/ -p 
+cd /home/rahul/.ssh
+wget --show-progress https://raw.githubusercontent.com/ravisankar-PIO/gitonibmi/main/id_ed25519
+wget --show-progress https://raw.githubusercontent.com/ravisankar-PIO/gitonibmi/main/id_ed25519.pub
+echo "export PATH=/QOpenSys/QIBM/ProdData/JavaVM/jdk17/64bit/bin:/QOpenSys/pkgs/bin:$PATH" >> .profile
+echo "source /home/$current_user/.gitprompt.sh" >> .profile
+
+mkdir /home/avadhoot/.ssh/ -p 
+cd /home/avadhoot/.ssh
+wget --show-progress https://raw.githubusercontent.com/ravisankar-PIO/gitonibmi/main/id_ed25519
+wget --show-progress https://raw.githubusercontent.com/ravisankar-PIO/gitonibmi/main/id_ed25519.pub
+echo "export PATH=/QOpenSys/QIBM/ProdData/JavaVM/jdk17/64bit/bin:/QOpenSys/pkgs/bin:$PATH" >> .profile
+echo "source /home/$current_user/.gitprompt.sh" >> .profile
 
 # ==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==
 # All done!
@@ -132,6 +195,6 @@ sc start jenkins
 echo -e "\n\n"
 echo -e '|============================================================|'
 echo -e '| Initial setup for Bash Prompt, Git, Service-commander,     |'
-echo -e "|             & Jenkins are completed!                       |"
+echo -e "|             BOB & Jenkins are completed!                   |"
 echo -e '|============================================================|'
 echo -e "\n\n"
