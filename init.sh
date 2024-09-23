@@ -53,25 +53,28 @@ createprofile(){
   printheading "Create User Libraries..."
   cl CRTLIB $1 
   
-  # Create a job description to put these libraries into library list
-  printheading "Create JOBD to setup the library list..."
-  echo "CRTJOBD JOBD(QGPL/PROGRAMMER) TEXT('Job Description for Developers') INLLIBL(DEVOPSLIB RAHUL AVADHOOT RAVI QGPL QTEMP)"
-  cl "CRTJOBD JOBD(QGPL/PROGRAMMER) TEXT('Job Description for Developers') INLLIBL(DEVOPSLIB RAHUL AVADHOOT RAVI QGPL QTEMP)"
-
   # Then create the user profiles and attach the JOBD to them
   printheading "Create user profiles..."
   echo "CRTUSRPRF USRPRF($1) PASSWORD(WELCOME) USRCLS(*SECOFR) CURLIB($1) TEXT('Developers Profile') JOBD(PROGRAMMER)"
   cl "CRTUSRPRF USRPRF($1) PASSWORD(WELCOME) USRCLS(*SECOFR) CURLIB($1) TEXT('Developers Profile') JOBD(PROGRAMMER)"
 
-  # Setup the keys and .profile file. 
+  # Setup the SSH Keys
   printheading "Setup the .ssh folder for the users..."
   mkdir -p /home/$1/.ssh  
   cd /home/$1/.ssh
   /QOpenSys/pkgs/bin/wget --show-progress https://raw.githubusercontent.com/ravisankar-PIO/gitonibmi/main/id_ed25519
   /QOpenSys/pkgs/bin/wget --show-progress https://raw.githubusercontent.com/ravisankar-PIO/gitonibmi/main/id_ed25519.pub
+  
+  # Setup the .profile file
   cd .. && echo "export PATH=/QOpenSys/QIBM/ProdData/JavaVM/jdk17/64bit/bin:/QOpenSys/pkgs/bin:$PATH" >> .profile
+  
+  # Setup gitprompt on bash
+  wget --show-progress https://raw.githubusercontent.com/ravisankar-PIO/gitonibmi/main/gitprompt.sh
+  mv gitprompt.sh .gitprompt.sh
   echo "PROMPT_COMMAND='__posh_git_ps1 \"\${VIRTUAL_ENV:+(\`basename \$VIRTUAL_ENV\`)}\\[\\e[32m\\]\\u\\[\\e[0m\\]@\\h:\\[\\e[33m\\]\\w\\[\\e[0m\\] \" \"\\\\\\\$ \";'\$PROMPT_COMMAND" >> .profile
-  echo "source /home/ravi/.gitprompt.sh" >> .profile
+  echo "source /home/$current_user/.gitprompt.sh" >> .profile
+
+  # Change the shell to Bash for this user
   /QOpenSys/pkgs/bin/chsh -s /QOpenSys/pkgs/bin/bash $1
 }
 
@@ -96,10 +99,11 @@ showProgress 10
 cd ~
 
 ## set Open source packages' path
-echo "export PATH=/QOpenSys/QIBM/ProdData/JavaVM/jdk17/64bit/bin:/QOpenSys/pkgs/bin:$PATH" >> .profile
+echo "export PATH=/QOpenSys/QIBM/ProdData/JavaVM/jdk17/64bit/bin:/QOpenSys/pkgs/bin:$PATH" >> .profile 
 # echo "export JAVA_HOME=/QOpenSys/pkgs/lib/jvm/openjdk-11" >> .profile
+
+# Setup Jenkins_Home path
 echo "export JENKINS_HOME=/home/$USER/jenkins_home" >> .profile
-# echo "export GITBUCKET_HOME=/home/$USER/gitbucket_home" >> .profile
 source ~/.profile
 
 
@@ -121,7 +125,6 @@ source ~/.profile
 # #################################################################################
 printheading "Setup GIT..."
 yum install git -y
-
 
 
 
@@ -162,13 +165,15 @@ yum install service-commander -y
 printheading "Configure the jenkins yml file..."
 showProgress 10
 cd ~
+# Download the Jenkins.yaml file template
 wget --show-progress https://raw.githubusercontent.com/ravisankar-PIO/gitonibmi/main/jenkins.yml
 
 current_user="$USER"
-# Use sed to replace CECUSER with Current_User and save to a temporary file
+# Use sed to replace CECUSER with Current_User and save it to a temporary file
 sed "s/CECUSER/$current_user/g" jenkins.yml > jenkins1.yml
-# Move the temporary file to the original file
+# Rename the temporary file as final file. 
 mv jenkins1.yml /QOpenSys/etc/sc/services/jenkins.yml
+# Remove the original file which contains a different user name
 rm jenkins.yml
 
 
@@ -194,6 +199,12 @@ yum install bob -y
 # Create User Profiles and libraries
 # #################################################################################
 cl CRTLIB DEVOPSLIB
+# Create a job description to put these libraries into library list
+printheading "Create JOBD to setup the library list..."
+echo "CRTJOBD JOBD(QGPL/PROGRAMMER) TEXT('Job Description for Developers') INLLIBL(DEVOPSLIB RAHUL AVADHOOT RAVI QGPL QTEMP)"
+cl "CRTJOBD JOBD(QGPL/PROGRAMMER) TEXT('Job Description for Developers') INLLIBL(DEVOPSLIB RAHUL AVADHOOT RAVI QGPL QTEMP)"
+
+# Create the required user profiles one by one. 
 createprofile "RAVI"
 createprofile "RAHUL"
 createprofile "AVADHOOT"
