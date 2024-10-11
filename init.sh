@@ -1,10 +1,11 @@
 #!/QOpenSys/usr/bin/bash
 # ------------------------------------------------------------------------- #
-# Program       : setup.sh
+# Program       : init.sh
 # Author        : Ravisankar Pandian
 # Company       : Programmers.io
 # Date Written  : 24/05/2024
 # Copyright     : Programmers.io
+# Description   : This script sets up all the necessary things required for DevOps Development
 # ------------------------------------------------------------------------- #
 
 #################################################################################
