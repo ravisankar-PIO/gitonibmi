@@ -1,9 +1,8 @@
 # gitonibmi
 A repository to connect the GitHub with IBMi
 
-## added  a line via VSCode
+# Profile Setup
 
- 
-## added another line
-- a bullet point
-- another bullet point
+```
+/QOpenSys/pkgs/bin/wget -qO- https://raw.githubusercontent.com/ravisankar-PIO/gitonibmi/refs/heads/main/profilesetup.sh | bash
+```
