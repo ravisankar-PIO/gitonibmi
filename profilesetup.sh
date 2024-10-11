@@ -14,13 +14,17 @@
 #################################################################################
 createprofile(){
   # Create the user libraries first
-  printheading "Create User Libraries..."
   cl CRTLIB $1 
   
   # Setup the SSH Keys
-  printheading "Setup the .ssh folder for the users..."
+  echo "Setup the .ssh folder for the users..."
+
+  echo "mkdir -p /home/$1/.ssh"
   mkdir -p /home/$1/.ssh  
+
+  echo "cd /home/$1/.ssh"
   cd /home/$1/.ssh
+
   /QOpenSys/pkgs/bin/wget --show-progress https://raw.githubusercontent.com/ravisankar-PIO/gitonibmi/main/id_ed25519
   /QOpenSys/pkgs/bin/wget --show-progress https://raw.githubusercontent.com/ravisankar-PIO/gitonibmi/main/id_ed25519.pub
   
@@ -34,6 +38,7 @@ createprofile(){
   echo "source /home/$1/.gitprompt.sh" >> .profile
 
   # Change the shell to Bash for this user
+  echo "/QOpenSys/pkgs/bin/chsh -s /QOpenSys/pkgs/bin/bash $1"
   /QOpenSys/pkgs/bin/chsh -s /QOpenSys/pkgs/bin/bash $1
 }
 
