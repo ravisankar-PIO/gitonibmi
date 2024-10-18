@@ -65,6 +65,8 @@ createprofile(){
   cd /home/$1/.ssh
   /QOpenSys/pkgs/bin/wget --show-progress https://raw.githubusercontent.com/ravisankar-PIO/gitonibmi/main/id_ed25519
   /QOpenSys/pkgs/bin/wget --show-progress https://raw.githubusercontent.com/ravisankar-PIO/gitonibmi/main/id_ed25519.pub
+  chmod 600 id_ed25519
+  chmod 600 id_ed25519.pub
   
   # Setup the .profile file
   cd .. && echo "export PATH=/QOpenSys/QIBM/ProdData/JavaVM/jdk17/64bit/bin:/QOpenSys/pkgs/bin:$PATH" >> .profile
@@ -138,7 +140,8 @@ cd .ssh
 printheading "Retrieve SSH Keypairs..."
 wget --show-progress https://raw.githubusercontent.com/ravisankar-PIO/gitonibmi/main/id_ed25519
 wget --show-progress https://raw.githubusercontent.com/ravisankar-PIO/gitonibmi/main/id_ed25519.pub
-
+chmod 600 id_ed25519
+chmod 600 id_ed25519.pub
 
 
 # #################################################################################
