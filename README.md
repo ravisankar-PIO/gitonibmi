@@ -14,3 +14,4 @@ A repository to connect the GitHub with IBMi
 1. Creates 3 user profiles  `Rahul, Ravi and Avadhoot` and 4 libraries `DEVOPSLIB, RAHULP, AVADHOOT, RAVI`
 3. Creates a JOBD `PROGRAMMER` for setting up the library list and attaches it to the user profiles
 4. Installs GIT, Jenkins, BOB, Service Commander & GitPrompt
+5. Sets up SSH Key for all profiles. 
