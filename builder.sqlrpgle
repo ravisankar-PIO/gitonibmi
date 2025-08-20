@@ -8,6 +8,8 @@ count += 1;
 note = 'Build# ' + %char(count);
 
 count = count;
+//added a new comment
+count = count +1; //and a new line
 
 exec sql INSERT INTO ravi.buildpf (note) VALUES (:note);
 eval count = count;
