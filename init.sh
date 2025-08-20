@@ -348,9 +348,11 @@ fi
 # Create DevOps library first
 printheading "Creating DevOps Library..."
 run_cl_cmd "CRTLIB LIB($DEVOPS_LIB) TEXT('DevOps Library')"
+log "DEBUG: After CRTLIB command, continuing to user creation..."
 
 # Create users first
 printheading "Creating user profiles..."
+log "DEBUG: Starting user profile creation loop..."
 for user in "${USERS_ARRAY[@]}"; do
     createprofile "$user"
 done
