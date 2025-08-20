@@ -299,13 +299,6 @@ install_packages() {
         return 1
     fi
     
-    # Update package database
-    log "Updating package database..."
-    if /QOpenSys/pkgs/bin/yum update -y >/dev/null 2>&1; then
-        log "Successfully updated packages"
-    else
-        log "Package update failed" "WARN"
-    fi
     
     # Install remaining packages
     local packages="git service-commander bob"
