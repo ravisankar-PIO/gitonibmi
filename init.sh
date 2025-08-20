@@ -77,8 +77,14 @@ run_cl_cmd() {
         log "Success: $1"
         return 0
     else
-        log "Failed: $1 - Output: $output" "ERROR"
-        return 1
+        # Check for "already exists" type errors and treat them as warnings
+        if echo "$output" | grep -q "CPF2111\|CPF2214\|CPD1611\|CPF1615\|CPF1621"; then
+            log "Warning: $1 - Library already exists: $output" "WARN"
+            return 0  # Treat as success since the resource exists
+        else
+            log "Failed: $1 - Output: $output" "ERROR"
+            return 1
+        fi
     fi
 }
 
@@ -292,7 +298,7 @@ install_packages() {
     
     # Install ibmi-repos first (dependency for other packages)
     log "Installing ibmi-repos..."
-    if /QOpenSys/pkgs/bin/yum install ibmi-repos -y >/dev/null 2>&1; then
+    if /QOpenSys/pkgs/bin/yum install ibmi-repos -y; then
         log "Successfully installed ibmi-repos"
     else
         log "Failed to install ibmi-repos" "ERROR"
@@ -304,9 +310,12 @@ install_packages() {
     local packages="git service-commander bob"
     for package in $packages; do
         log "Installing $package..."
-        if /QOpenSys/pkgs/bin/yum install "$package" -y >/dev/null 2>&1; then
+        echo "=== YUM OUTPUT START ==="
+        if /QOpenSys/pkgs/bin/yum install "$package" -y; then
+            echo "=== YUM OUTPUT END ==="
             log "Successfully installed $package"
         else
+            echo "=== YUM OUTPUT END ==="
             log "Failed to install $package" "WARN"
         fi
     done
