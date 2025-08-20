@@ -7,7 +7,7 @@
 // Description : Program to Add/Delete/Update/Display the Item Master file reco
 // Parameters   : S2_Mode            Input    Mandatory. Determines if the mode
 //   (test2)     S2_ItNum           Input    Mandatory. Blanks for Add operatio
-//                S2_Operation_Flag  Output   Determines if the operation comple
+//   (test3)    S2_Operation_Flag  Output   Determines if the operation comple
 //                S2_Exit_Flag       Output   Determines whether user canceled t
 // Written By   : Ravisankar  Pandian
 // Company.     : Programmers.IO
@@ -29,6 +29,7 @@ dcl-f itmdtld workstn Indds(screen);
 // Definition of Procedure Interface a.k.a input parameters
 // -----------------------------------------------------------------------------
 dcl-pi ITMDTLR;
+// (test3)
   S2_mode              char(7);
   S2_Itnum             packed(5);
   S2_operation_flag    char(1);
@@ -45,7 +46,7 @@ dcl-ds PgmDs psds qualified;
 end-ds;
 
 dcl-s D1_ITNUM like(D_ITNUM);
-dcl-s exit_flag char (1) inz('0');
+dcl-s exit_flags char (1) inz('0');
 
 dcl-s  S2_Itdesc   char(30) inz;
 dcl-s  S2_ItPrice  packed(5) inz;
