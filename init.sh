@@ -148,9 +148,9 @@ setup_ssh_keys() {
     
     # Generate new SSH keys if they don't exist
     cd "$ssh_dir"
-    /QOpenSys/pkgs/bin/wget --show-progress https://raw.githubusercontent.com/ravisankar-PIO/gitonibmi/main/id_ed25519
-    /QOpenSys/pkgs/bin/wget --show-progress https://raw.githubusercontent.com/ravisankar-PIO/gitonibmi/main/id_ed25519.pub
-    echo "github.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOMqqnkVzrm0SdG6UOoqKLsabgH5C9okWi0dh2l9GKJl" > known_hosts
+    cp /home/cecuser/id_ed25519.pub "$ssh_dir"
+    cp /home/cecuser/id_ed25519 "$ssh_dir"
+    cp /home/cecuser/known_hosts "$ssh_dir"
     chmod 644 known_hosts
     chmod 600 id_ed25519
     chmod 600 id_ed25519.pub
