@@ -6,6 +6,8 @@
 # Date Written  : 24/05/2024
 # Copyright     : Programmers.io
 # Description   : This script sets up all the necessary things required for DevOps Development
+# Usage         : ./init.sh [jenkins]
+#                 jenkins - Install and configure Jenkins
 # ------------------------------------------------------------------------- #
 
 # Don't exit on errors - handle them explicitly
@@ -65,7 +67,6 @@ fi
 command_exists() {
     command -v "$1" >/dev/null 2>&1
 }
-
 
 #################################################################################
 # Function to run IBM i command with error checking
@@ -284,7 +285,6 @@ createprofile(){
     return 0
 }
 
-
 #################################################################################
 # Function to install packages with better error handling
 #################################################################################
@@ -324,21 +324,164 @@ install_packages() {
 }
 
 #################################################################################
+# Function to setup Jenkins installation and configuration
+#################################################################################
+setup_jenkins() {
+    printheading "Setting up Jenkins..."
+    
+    # Check if Java is available for Jenkins
+    if [ -z "$JAVA_HOME" ] || [ ! -x "$JAVA_HOME/bin/java" ]; then
+        log "Java not found - Jenkins requires Java to run" "ERROR"
+        return 1
+    fi
+    
+    # Create Jenkins directories
+    if ! mkdir -p ~/jenkins ~/jenkins_home; then
+        log "Could not create Jenkins directories" "ERROR"
+        return 1
+    fi
+
+    # Download Jenkins if not already present
+    if [ ! -f ~/jenkins/jenkins.war ]; then
+        if command_exists /QOpenSys/pkgs/bin/wget; then
+            log "Downloading Jenkins..."
+            if /QOpenSys/pkgs/bin/wget --secure-protocol=TLSv1_2 --timeout=300 --show-progress -P ~/jenkins \
+                http://mirrors.jenkins.io/war-stable/latest/jenkins.war; then
+                log "Successfully downloaded Jenkins"
+            else
+                log "Failed to download Jenkins" "ERROR"
+                return 1
+            fi
+        else
+            log "/QOpenSys/pkgs/bin/wget not available for Jenkins download" "ERROR"
+            return 1
+        fi
+    else
+        log "Jenkins already downloaded"
+    fi
+
+    # Setup Jenkins service configuration
+    printheading "Configuring Jenkins service..."
+    jenkins_config="/QOpenSys/etc/sc/services/jenkins.yml"
+    jenkins_config_dir=$(dirname "$jenkins_config")
+
+    # Ensure config directory exists
+    if ! mkdir -p "$jenkins_config_dir"; then
+        log "Could not create service commander config directory" "WARN"
+    fi
+
+    if [ ! -f "$jenkins_config" ]; then
+        if cat > "$jenkins_config" << EOF
+name: Jenkins on IBMi
+dir: /home/$USER/jenkins
+start_cmd: java -jar '/home/$USER/jenkins/jenkins.war' '--httpPort=$JENKINS_PORT'
+check_alive: '$JENKINS_PORT'
+batch_mode: 'false'
+environment_vars:
+- PATH=$PATH
+- JAVA_HOME=$JAVA_HOME
+- JENKINS_HOME=/home/$USER/jenkins_home
+EOF
+        then
+            log "Jenkins configuration created"
+        else
+            log "Could not create Jenkins configuration" "WARN"
+            return 1
+        fi
+    else
+        log "Jenkins configuration already exists"
+    fi
+
+    # Start Jenkins
+    printheading "Starting Jenkins..."
+    if command_exists sc; then
+        if /QOpenSys/pkgs/bin/sc start jenkins >/dev/null 2>&1; then
+            log "Jenkins started successfully"
+            # Wait a moment and check if it's actually running
+            sleep 5
+            if /QOpenSys/pkgs/bin/sc info jenkins >/dev/null 2>&1; then
+                log "Jenkins is running at: http://$(uname -n):$JENKINS_PORT"
+                
+                # Display initial admin password location
+                local admin_password_file="/home/$USER/jenkins_home/secrets/initialAdminPassword"
+                if [ -f "$admin_password_file" ]; then
+                    log "Jenkins initial admin password can be found at: $admin_password_file"
+                fi
+            else
+                log "Jenkins may have failed to start properly" "WARN"
+            fi
+        else
+            log "Could not start Jenkins via service commander" "WARN"
+            log "Try starting manually: sc start jenkins"
+            return 1
+        fi
+    else
+        log "Service commander not available" "WARN"
+        return 1
+    fi
+    
+    return 0
+}
+
+#################################################################################
+# Function to show usage information
+#################################################################################
+show_usage() {
+    echo "Usage: $0 [jenkins]"
+    echo ""
+    echo "Options:"
+    echo "  jenkins    Install and configure Jenkins along with base setup"
+    echo "  (no args)  Perform base DevOps setup only (users, packages, libraries)"
+    echo ""
+    echo "Environment Variables:"
+    echo "  DEVOPS_USERS      Users to create (default: 'RAVI RAHUL AVADHOOT')"
+    echo "  DEVOPS_LIB        DevOps library name (default: 'DEVOPSLIB')"
+    echo "  JENKINS_PORT      Jenkins port (default: 9095)"
+    echo "  DEFAULT_PASSWORD  Default password for users (default: 'welcome')"
+    echo ""
+    echo "Examples:"
+    echo "  $0              # Base setup only"
+    echo "  $0 jenkins      # Base setup + Jenkins installation"
+    exit 0
+}
+
+#################################################################################
 #
 #                                    MAIN LOGIC 
 #
 #################################################################################
 
+# Handle command line parameters
+case "$1" in
+    "jenkins")
+        INSTALL_JENKINS=true
+        ;;
+    "-h"|"--help"|"help")
+        show_usage
+        ;;
+    "")
+        INSTALL_JENKINS=false
+        ;;
+    *)
+        log "Unknown parameter: $1" "ERROR"
+        show_usage
+        ;;
+esac
+
 log "Starting DevOps environment setup with the following configuration:"
 log "Users to create: ${USERS_ARRAY[*]}"
 log "DevOps library: $DEVOPS_LIB"
-log "Jenkins port: $JENKINS_PORT"
+if [ "$INSTALL_JENKINS" = true ]; then
+    log "Jenkins port: $JENKINS_PORT"
+    log "Jenkins installation: ENABLED"
+else
+    log "Jenkins installation: DISABLED"
+fi
 log "Default password: $DEFAULT_PASSWORD"
 
 # Set bash as default shell for current user
 printheading "Setting up bash shell..."
 /QOpenSys/pkgs/bin/chsh -s /QOpenSys/pkgs/bin/bash "$USER" 2>/dev/null || log "Could not change shell" "WARN"
-
 
 # Install required packages
 if ! install_packages; then
@@ -376,81 +519,19 @@ for user in "${USERS_ARRAY[@]}"; do
     run_cl_cmd "CHGUSRPRF USRPRF($user) JOBD(PROGRAMMER)"
 done
 
-# Setup Jenkins
-printheading "Setting up Jenkins..."
-if ! mkdir -p ~/jenkins ~/jenkins_home; then
-    log "Could not create Jenkins directories" "ERROR"
-    exit 1
-fi
-
-if [ ! -f ~/jenkins/jenkins.war ]; then
-    if command_exists /QOpenSys/pkgs/bin/wget; then
-        log "Downloading Jenkins..."
-        if /QOpenSys/pkgs/bin/wget --secure-protocol=TLSv1_2 --timeout=300 --show-progress -P ~/jenkins \
-            http://mirrors.jenkins.io/war-stable/latest/jenkins.war; then
-            log "Successfully downloaded Jenkins"
-        else
-            log "Failed to download Jenkins" "ERROR"
-            exit 1
-        fi
-    else
-        log "/QOpenSys/pkgs/bin/wget not available for Jenkins download" "ERROR"
-        exit 1
+# Install Jenkins if requested
+if [ "$INSTALL_JENKINS" = true ]; then
+    if ! setup_jenkins; then
+        log "Jenkins setup failed" "ERROR"
+        # Don't exit - continue with rest of setup
     fi
 else
-    log "Jenkins already downloaded"
+    log "Skipping Jenkins installation (not requested)"
 fi
 
-# Setup Jenkins service configuration
-printheading "Configuring Jenkins service..."
-jenkins_config="/QOpenSys/etc/sc/services/jenkins.yml"
-jenkins_config_dir=$(dirname "$jenkins_config")
+## Install PFGREP
+wget https://github.com/SeidenGroup/pfgrep/releases/download/v0.5.1/pfgrep-0.5.1-0seiden.ibmi7.2.ppc64.rpm && yum install pfgrep-0.5.1-0seiden.ibmi7.2.ppc64.rpm -y
 
-# Ensure config directory exists
-if ! mkdir -p "$jenkins_config_dir"; then
-    log "Could not create service commander config directory" "WARN"
-fi
-
-if [ ! -f "$jenkins_config" ]; then
-    if cat > "$jenkins_config" << EOF
-name: Jenkins on IBMi
-dir: /home/$USER/jenkins
-start_cmd: java -jar '/home/$USER/jenkins/jenkins.war' '--httpPort=$JENKINS_PORT'
-check_alive: '$JENKINS_PORT'
-batch_mode: 'false'
-environment_vars:
-- PATH=$PATH
-- JAVA_HOME=$JAVA_HOME
-- JENKINS_HOME=/home/$USER/jenkins_home
-EOF
-    then
-        log "Jenkins configuration created"
-    else
-        log "Could not create Jenkins configuration" "WARN"
-    fi
-else
-    log "Jenkins configuration already exists"
-fi
-
-# Start Jenkins
-printheading "Starting Jenkins..."
-if command_exists sc; then
-    if /QOpenSys/pkgs/bin/sc start jenkins >/dev/null 2>&1; then
-        log "Jenkins started successfully"
-        # Wait a moment and check if it's actually running
-        sleep 5
-        if /QOpenSys/pkgs/bin/sc info jenkins >/dev/null 2>&1; then
-            log "Jenkins is running at: http://$(uname -n):$JENKINS_PORT"
-        else
-            log "Jenkins may have failed to start properly" "WARN"
-        fi
-    else
-        log "Could not start Jenkins via service commander" "WARN"
-        log "Try starting manually: sc start jenkins"
-    fi
-else
-    log "Service commander not available" "WARN"
-fi
 
 #################################################################################
 # Final validation and cleanup
@@ -485,14 +566,18 @@ echo -e "\n\n"
 echo -e '|============================================================|'
 echo -e '| DevOps Environment Setup Completed!                        |'
 echo -e '|                                                            |'
-echo -e "| Jenkins URL: http://$(uname -n):$JENKINS_PORT              |"
+if [ "$INSTALL_JENKINS" = true ]; then
+    echo -e "| Jenkins URL: http://$(uname -n):$JENKINS_PORT              |"
+fi
 echo -e "| Users created: ${USERS_ARRAY[*]}                           |"
 echo -e "| Default password: $DEFAULT_PASSWORD                        |"
 echo -e '|                                                            |'
 echo -e '| SECURITY REMINDERS:                                        |'
 echo -e '| 1. Change default passwords immediately                    |'
 echo -e '| 2. Add SSH public keys to your Git repositories            |'
-echo -e '| 3. Verify Jenkins is accessible and secure                 |'
+if [ "$INSTALL_JENKINS" = true ]; then
+    echo -e '| 3. Verify Jenkins is accessible and secure                 |'
+fi
 echo -e '| 4. Review user privileges and adjust as needed             |'
 echo -e '|============================================================|'
 echo -e "\n\n"
