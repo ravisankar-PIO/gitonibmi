@@ -6,15 +6,17 @@
 # Date Written  : 24/05/2024
 # Copyright     : Programmers.io
 # Description   : This script sets up all the necessary things required for DevOps Development
-# Usage         : ./init.sh [jenkins]
+# Usage         : ./init.sh [jenkins] [bob] [sc]
 #                 jenkins - Install and configure Jenkins
+#                 bob     - Install Better Object Builder
+#                 sc      - Install Service Commander
 # ------------------------------------------------------------------------- #
 
 # Don't exit on errors - handle them explicitly
 set +e
 
 # Setup Environment Variables
-USERS_TO_CREATE="${DEVOPS_USERS:-RAVI RAHUL AVADHOOT YOGESH KHUSHI NAVEEN}"
+USERS_TO_CREATE="${DEVOPS_USERS:-RAVI RAHUL AVADHOOT YOGESH KHUSHI NAVEEN GAURAV}"
 DEVOPS_LIB="${DEVOPS_LIB:-DEVOPSSRC}"
 JENKINS_PORT="${JENKINS_PORT:-9095}"
 DEFAULT_PASSWORD="${DEFAULT_PASSWORD:-welcome}"
@@ -50,16 +52,6 @@ detect_java() {
     log "No suitable Java installation found" "ERROR"
     return 1
 }
-
-# Set PATH with detected Java
-if JAVA_BIN=$(detect_java); then
-    export PATH="$JAVA_BIN:/QOpenSys/pkgs/bin:/QOpenSys/usr/bin:$PATH"
-    export JAVA_HOME="${JAVA_BIN%/bin}"
-    log "Using Java from: $JAVA_HOME"
-else
-    export PATH="/QOpenSys/pkgs/bin:/QOpenSys/usr/bin:$PATH"
-    log "Proceeding without Java in PATH" "WARN"
-fi
 
 #################################################################################
 # Function to check if command exists
@@ -180,10 +172,20 @@ setup_user_environment() {
     if [ ! -s "$profile_file" ]; then
         # Create temporary file first
         local temp_profile=$(mktemp)
+        
+        # Build PATH based on what's being installed
+        local path_config="export PATH=/QOpenSys/pkgs/bin:\$PATH"
+        if [ "$INSTALL_JENKINS" = true ] || [ "$INSTALL_BOB" = true ]; then
+            # Only add Java to PATH if Jenkins or BOB is being installed
+            if [ -n "$JAVA_HOME" ]; then
+                path_config="export PATH=$JAVA_HOME/bin:/QOpenSys/pkgs/bin:\$PATH"
+            fi
+        fi
+        
         if cat > "$temp_profile" << EOF
 # DevOps Environment Setup for $username
-export PATH=$JAVA_HOME/bin:/QOpenSys/pkgs/bin:\$PATH
-export JENKINS_HOME=/home/$username/jenkins_home
+$path_config
+$([ "$INSTALL_JENKINS" = true ] && echo "export JENKINS_HOME=/home/$username/jenkins_home")
 
 # Git prompt setup
 if [ -f ~/.gitprompt.sh ]; then
@@ -260,9 +262,13 @@ createprofile(){
         log "Created user $username with password: $DEFAULT_PASSWORD" "INFO"
     fi
     
-    # Setup SSH keys
-    if ! setup_ssh_keys "$username"; then
-        log "SSH key setup failed for $username" "WARN"
+    # Setup SSH keys only for RAVI
+    if [ "$username" = "RAVI" ]; then
+        if ! setup_ssh_keys "$username"; then
+            log "SSH key setup failed for $username" "WARN"
+        fi
+    else
+        log "Skipping SSH key setup for $username (only RAVI gets SSH keys)" "INFO"
     fi
     
     # Setup user environment
@@ -286,10 +292,10 @@ createprofile(){
 }
 
 #################################################################################
-# Function to install packages with better error handling
+# Function to install base packages (git and ibmi-repos only)
 #################################################################################
-install_packages() {
-    printheading "Installing required packages..."
+install_base_packages() {
+    printheading "Installing base packages..."
     
     if ! command_exists /QOpenSys/pkgs/bin/yum; then
         log "/QOpenSys/pkgs/bin/yum not available" "ERROR"
@@ -305,20 +311,73 @@ install_packages() {
         return 1
     fi
     
+    # Install git
+    log "Installing git..."
+    echo "=== YUM OUTPUT START ==="
+    if /QOpenSys/pkgs/bin/yum install git -y; then
+        echo "=== YUM OUTPUT END ==="
+        log "Successfully installed git"
+    else
+        echo "=== YUM OUTPUT END ==="
+        log "Failed to install git" "WARN"
+    fi
     
-    # Install remaining packages
-    local packages="git service-commander bob"
-    for package in $packages; do
-        log "Installing $package..."
-        echo "=== YUM OUTPUT START ==="
-        if /QOpenSys/pkgs/bin/yum install "$package" -y; then
-            echo "=== YUM OUTPUT END ==="
-            log "Successfully installed $package"
-        else
-            echo "=== YUM OUTPUT END ==="
-            log "Failed to install $package" "WARN"
+    return 0
+}
+
+#################################################################################
+# Function to install Service Commander
+#################################################################################
+install_service_commander() {
+    printheading "Installing Service Commander..."
+    
+    if ! command_exists /QOpenSys/pkgs/bin/yum; then
+        log "/QOpenSys/pkgs/bin/yum not available" "ERROR"
+        return 1
+    fi
+    
+    log "Installing service-commander..."
+    echo "=== YUM OUTPUT START ==="
+    if /QOpenSys/pkgs/bin/yum install service-commander -y; then
+        echo "=== YUM OUTPUT END ==="
+        log "Successfully installed Service Commander"
+    else
+        echo "=== YUM OUTPUT END ==="
+        log "Failed to install Service Commander" "ERROR"
+        return 1
+    fi
+    
+    return 0
+}
+
+#################################################################################
+# Function to install BOB (Better Object Builder)
+#################################################################################
+install_bob() {
+    printheading "Installing Better Object Builder (BOB)..."
+    
+    if ! command_exists /QOpenSys/pkgs/bin/yum; then
+        log "/QOpenSys/pkgs/bin/yum not available" "ERROR"
+        return 1
+    fi
+    
+    log "Installing bob (this will also install Java as a dependency)..."
+    echo "=== YUM OUTPUT START ==="
+    if /QOpenSys/pkgs/bin/yum install bob -y; then
+        echo "=== YUM OUTPUT END ==="
+        log "Successfully installed BOB"
+        
+        # Detect Java that was installed as dependency
+        if JAVA_BIN=$(detect_java); then
+            export PATH="$JAVA_BIN:/QOpenSys/pkgs/bin:/QOpenSys/usr/bin:$PATH"
+            export JAVA_HOME="${JAVA_BIN%/bin}"
+            log "Java installed as BOB dependency: $JAVA_HOME"
         fi
-    done
+    else
+        echo "=== YUM OUTPUT END ==="
+        log "Failed to install BOB" "ERROR"
+        return 1
+    fi
     
     return 0
 }
@@ -329,9 +388,14 @@ install_packages() {
 setup_jenkins() {
     printheading "Setting up Jenkins..."
     
-    # Check if Java is available for Jenkins
-    if [ -z "$JAVA_HOME" ] || [ ! -x "$JAVA_HOME/bin/java" ]; then
+    # Detect Java for Jenkins
+    if JAVA_BIN=$(detect_java); then
+        export PATH="$JAVA_BIN:/QOpenSys/pkgs/bin:/QOpenSys/usr/bin:$PATH"
+        export JAVA_HOME="${JAVA_BIN%/bin}"
+        log "Using Java from: $JAVA_HOME"
+    else
         log "Java not found - Jenkins requires Java to run" "ERROR"
+        log "Please install Java first or run with 'bob' parameter to install BOB (which includes Java)"
         return 1
     fi
     
@@ -416,8 +480,9 @@ EOF
             return 1
         fi
     else
-        log "Service commander not available" "WARN"
-        return 1
+        log "Service Commander not available - Jenkins installed but not started" "WARN"
+        log "Install Service Commander with './init.sh sc' or start Jenkins manually"
+        return 0  # Not a failure, just a warning
     fi
     
     return 0
@@ -427,21 +492,32 @@ EOF
 # Function to show usage information
 #################################################################################
 show_usage() {
-    echo "Usage: $0 [jenkins]"
+    echo "Usage: $0 [jenkins] [bob] [sc]"
     echo ""
     echo "Options:"
     echo "  jenkins    Install and configure Jenkins along with base setup"
-    echo "  (no args)  Perform base DevOps setup only (users, packages, libraries)"
+    echo "  bob        Install Better Object Builder (BOB) - includes Java"
+    echo "  sc         Install Service Commander (required for Jenkins auto-start)"
+    echo "  (no args)  Perform base DevOps setup only (users, git)"
+    echo ""
+    echo "You can combine options:"
+    echo "  $0 sc jenkins bob    # Install Service Commander, Jenkins, and BOB"
+    echo "  $0 jenkins sc        # Install Jenkins with Service Commander"
     echo ""
     echo "Environment Variables:"
-    echo "  DEVOPS_USERS      Users to create (default: 'RAVI RAHUL AVADHOOT')"
-    echo "  DEVOPS_LIB        DevOps library name (default: 'DEVOPSLIB')"
+    echo "  DEVOPS_USERS      Users to create (default: 'RAVI RAHUL AVADHOOT YOGESH KHUSHI NAVEEN GAURAV')"
+    echo "  DEVOPS_LIB        DevOps library name (default: 'DEVOPSSRC')"
     echo "  JENKINS_PORT      Jenkins port (default: 9095)"
     echo "  DEFAULT_PASSWORD  Default password for users (default: 'welcome')"
     echo ""
     echo "Examples:"
-    echo "  $0              # Base setup only"
-    echo "  $0 jenkins      # Base setup + Jenkins installation"
+    echo "  $0                  # Base setup only (git, users)"
+    echo "  $0 sc               # Base setup + Service Commander"
+    echo "  $0 bob              # Base setup + BOB installation"
+    echo "  $0 sc jenkins       # Base setup + Service Commander + Jenkins"
+    echo "  $0 sc jenkins bob   # Complete setup (all components)"
+    echo ""
+    echo "Note: Jenkins requires Service Commander to auto-start"
     exit 0
 }
 
@@ -451,41 +527,77 @@ show_usage() {
 #
 #################################################################################
 
-# Handle command line parameters
-case "$1" in
-    "jenkins")
-        INSTALL_JENKINS=true
-        ;;
-    "-h"|"--help"|"help")
-        show_usage
-        ;;
-    "")
-        INSTALL_JENKINS=false
-        ;;
-    *)
-        log "Unknown parameter: $1" "ERROR"
-        show_usage
-        ;;
-esac
+# Initialize flags
+INSTALL_JENKINS=false
+INSTALL_BOB=false
+INSTALL_SC=false
+
+# Parse command line parameters
+for arg in "$@"; do
+    case "$arg" in
+        "jenkins")
+            INSTALL_JENKINS=true
+            ;;
+        "bob")
+            INSTALL_BOB=true
+            ;;
+        "sc")
+            INSTALL_SC=true
+            ;;
+        "-h"|"--help"|"help")
+            show_usage
+            ;;
+        *)
+            log "Unknown parameter: $arg" "ERROR"
+            show_usage
+            ;;
+    esac
+done
 
 log "Starting DevOps environment setup with the following configuration:"
 log "Users to create: ${USERS_ARRAY[*]}"
 log "DevOps library: $DEVOPS_LIB"
+log "Default password: $DEFAULT_PASSWORD"
 if [ "$INSTALL_JENKINS" = true ]; then
     log "Jenkins port: $JENKINS_PORT"
     log "Jenkins installation: ENABLED"
 else
     log "Jenkins installation: DISABLED"
 fi
-log "Default password: $DEFAULT_PASSWORD"
+if [ "$INSTALL_BOB" = true ]; then
+    log "BOB installation: ENABLED"
+else
+    log "BOB installation: DISABLED"
+fi
+if [ "$INSTALL_SC" = true ]; then
+    log "Service Commander installation: ENABLED"
+else
+    log "Service Commander installation: DISABLED"
+fi
 
 # Set bash as default shell for current user
 printheading "Setting up bash shell..."
 /QOpenSys/pkgs/bin/chsh -s /QOpenSys/pkgs/bin/bash "$USER" 2>/dev/null || log "Could not change shell" "WARN"
 
-# Install required packages
-if ! install_packages; then
-    log "Package installation had issues - continuing anyway" "WARN"
+# Install base packages (git, ibmi-repos)
+if ! install_base_packages; then
+    log "Base package installation had issues - continuing anyway" "WARN"
+fi
+
+# Install Service Commander if requested
+if [ "$INSTALL_SC" = true ]; then
+    if ! install_service_commander; then
+        log "Service Commander installation failed" "ERROR"
+        # Don't exit - continue with rest of setup
+    fi
+fi
+
+# Install BOB if requested
+if [ "$INSTALL_BOB" = true ]; then
+    if ! install_bob; then
+        log "BOB installation failed" "ERROR"
+        # Don't exit - continue with rest of setup
+    fi
 fi
 
 # Create DevOps library first
@@ -500,19 +612,9 @@ for user in "${USERS_ARRAY[@]}"; do
     createprofile "$user"
 done
 
-# Now create JOBD that references the users
+# Now create JOBD to setup INLLIBL
 printheading "Creating Job Description..."
-# Build library list properly
-jobd_libs=""
-for user in "${USERS_ARRAY[@]}"; do
-    if [ -z "$jobd_libs" ]; then
-        jobd_libs="$user"
-    else
-        jobd_libs="$jobd_libs $user"
-    fi
-done
-
-run_cl_cmd "CRTJOBD JOBD(QGPL/PROGRAMMER) TEXT('Job Description for Developers') INLLIBL($DEVOPS_LIB $jobd_libs QGPL QTEMP)"
+run_cl_cmd "CRTJOBD JOBD(QGPL/PROGRAMMER) TEXT('Job Description for Developers') INLLIBL(QGPL QTEMP $DEVOPS_LIB)"
 
 # Update existing users to use the JOBD
 for user in "${USERS_ARRAY[@]}"; do
@@ -530,8 +632,12 @@ else
 fi
 
 ## Install PFGREP
-wget https://github.com/SeidenGroup/pfgrep/releases/download/v0.5.1/pfgrep-0.5.1-0seiden.ibmi7.2.ppc64.rpm && yum install pfgrep-0.5.1-0seiden.ibmi7.2.ppc64.rpm -y
-
+printheading "Installing PFGREP..."
+if wget https://github.com/SeidenGroup/pfgrep/releases/download/v0.5.1/pfgrep-0.5.1-0seiden.ibmi7.2.ppc64.rpm && yum install pfgrep-0.5.1-0seiden.ibmi7.2.ppc64.rpm -y; then
+    log "PFGREP installed successfully"
+else
+    log "PFGREP installation failed" "WARN"
+fi
 
 #################################################################################
 # Final validation and cleanup
@@ -547,14 +653,12 @@ for user in "${USERS_ARRAY[@]}"; do
     fi
 done
 
-# Display SSH public keys for users to add to Git repositories
-log "SSH Public Keys (add these to your Git repositories):"
-for user in "${USERS_ARRAY[@]}"; do
-    local pubkey_file="/home/$user/.ssh/id_ed25519.pub"
-    if [ -f "$pubkey_file" ]; then
-        log "$user: $(cat "$pubkey_file")"
-    fi
-done
+# Display SSH public key for RAVI
+log "SSH Public Key for RAVI (add this to your Git repositories):"
+local pubkey_file="/home/RAVI/.ssh/id_ed25519.pub"
+if [ -f "$pubkey_file" ]; then
+    log "RAVI: $(cat "$pubkey_file")"
+fi
 
 #################################################################################
 # All done!
@@ -569,12 +673,18 @@ echo -e '|                                                            |'
 if [ "$INSTALL_JENKINS" = true ]; then
     echo -e "| Jenkins URL: http://$(uname -n):$JENKINS_PORT              |"
 fi
+if [ "$INSTALL_BOB" = true ]; then
+    echo -e '| BOB (Better Object Builder) installed                      |'
+fi
+if [ "$INSTALL_SC" = true ]; then
+    echo -e '| Service Commander installed                                |'
+fi
 echo -e "| Users created: ${USERS_ARRAY[*]}                           |"
 echo -e "| Default password: $DEFAULT_PASSWORD                        |"
 echo -e '|                                                            |'
 echo -e '| SECURITY REMINDERS:                                        |'
 echo -e '| 1. Change default passwords immediately                    |'
-echo -e '| 2. Add SSH public keys to your Git repositories            |'
+echo -e '| 2. Add SSH public key (RAVI only) to Git repositories      |'
 if [ "$INSTALL_JENKINS" = true ]; then
     echo -e '| 3. Verify Jenkins is accessible and secure                 |'
 fi
