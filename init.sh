@@ -170,8 +170,8 @@ setup_user_environment() {
     
     # Setup .profile only if it doesn't exist or is empty
     if [ ! -s "$profile_file" ]; then
-        # Create temporary file first
-        local temp_profile=$(mktemp)
+        # Create temporary file using timestamp for uniqueness
+        local temp_profile="$user_home/.profile.tmp.$"
         
         # Build PATH based on what's being installed
         local path_config="export PATH=/QOpenSys/pkgs/bin:\$PATH"
@@ -655,7 +655,7 @@ done
 
 # Display SSH public key for RAVI
 log "SSH Public Key for RAVI (add this to your Git repositories):"
-local pubkey_file="/home/RAVI/.ssh/id_ed25519.pub"
+pubkey_file="/home/RAVI/.ssh/id_ed25519.pub"
 if [ -f "$pubkey_file" ]; then
     log "RAVI: $(cat "$pubkey_file")"
 fi
