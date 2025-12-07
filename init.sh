@@ -17,7 +17,7 @@ set +e
 
 # Setup Environment Variables
 USERS_TO_CREATE="${DEVOPS_USERS:-RAVI RAHUL AVADHOOT YOGESH KHUSHI NAVEEN GAURAV}"
-DEVOPS_LIB="${DEVOPS_LIB:-DEVOPSSRC}"
+DEVOPS_LIB="${DEVOPS_LIB:-PIODEVOPS}"
 JENKINS_PORT="${JENKINS_PORT:-9095}"
 DEFAULT_PASSWORD="${DEFAULT_PASSWORD:-welcome}"
 
@@ -255,7 +255,7 @@ createprofile(){
     
     # Create user profile with better security
     # Note: Using USRCLS(*USER) instead of *SECOFR for security
-    local create_user_cmd="CRTUSRPRF USRPRF($username) PASSWORD($DEFAULT_PASSWORD) USRCLS(*SECOFR) CURLIB($username) TEXT('Developer Profile')"
+    local create_user_cmd="CRTUSRPRF USRPRF($username) PASSWORD($DEFAULT_PASSWORD) USRCLS(*SECOFR) CURLIB($username) TEXT($username)"
     if ! run_cl_cmd "$create_user_cmd"; then
         log "User creation failed for $username - may already exist" "WARN"
     else
@@ -506,7 +506,7 @@ show_usage() {
     echo ""
     echo "Environment Variables:"
     echo "  DEVOPS_USERS      Users to create (default: 'RAVI RAHUL AVADHOOT YOGESH KHUSHI NAVEEN GAURAV')"
-    echo "  DEVOPS_LIB        DevOps library name (default: 'DEVOPSSRC')"
+    echo "  DEVOPS_LIB        DevOps library name (default: 'PIODEVOPS')"
     echo "  JENKINS_PORT      Jenkins port (default: 9095)"
     echo "  DEFAULT_PASSWORD  Default password for users (default: 'welcome')"
     echo ""
