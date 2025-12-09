@@ -633,7 +633,7 @@ fi
 
 ## Install PFGREP
 printheading "Installing PFGREP..."
-if wget https://github.com/SeidenGroup/pfgrep/releases/download/v0.5.1/pfgrep-0.5.1-0seiden.ibmi7.2.ppc64.rpm && yum install pfgrep-0.5.1-0seiden.ibmi7.2.ppc64.rpm -y; then
+if /QOpenSys/pkgs/bin/wget https://github.com/SeidenGroup/pfgrep/releases/download/v0.5.1/pfgrep-0.5.1-0seiden.ibmi7.2.ppc64.rpm && /QOpenSys/pkgs/bin/yum install pfgrep-0.5.1-0seiden.ibmi7.2.ppc64.rpm -y; then
     log "PFGREP installed successfully"
 else
     log "PFGREP installation failed" "WARN"
