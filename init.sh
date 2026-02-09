@@ -19,7 +19,7 @@ set +e
 USERS_TO_CREATE="${DEVOPS_USERS:-RAVI RAHUL AVADHOOT YOGESH KHUSHI NAVEEN GAURAV MITESH}"
 DEVOPS_LIB="${DEVOPS_LIB:-PIODEVOPS}"
 JENKINS_PORT="${JENKINS_PORT:-9095}"
-DEFAULT_PASSWORD="${DEFAULT_PASSWORD:-Welcome@123IBMi}"
+DEFAULT_PASSWORD="${DEFAULT_PASSWORD:-welcome}"
 
 # Convert space-separated string to array
 read -ra USERS_ARRAY <<< "$USERS_TO_CREATE"
@@ -508,7 +508,7 @@ show_usage() {
     echo "  DEVOPS_USERS      Users to create (default: 'RAVI RAHUL AVADHOOT YOGESH KHUSHI NAVEEN GAURAV')"
     echo "  DEVOPS_LIB        DevOps library name (default: 'PIODEVOPS')"
     echo "  JENKINS_PORT      Jenkins port (default: 9095)"
-    echo "  DEFAULT_PASSWORD  Default password for users (default: 'Welcome@123IBMi')"
+    echo "  DEFAULT_PASSWORD  Default password for users (default: 'welcome')"
     echo ""
     echo "Examples:"
     echo "  $0                  # Base setup only (git, users)"
