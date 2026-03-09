@@ -16,7 +16,7 @@
 set +e
 
 # Setup Environment Variables
-USERS_TO_CREATE="${DEVOPS_USERS:-RAVI RAHUL AVADHOOT YOGESH KHUSHI NAVEEN GAURAV MITESH}"
+USERS_TO_CREATE="${DEVOPS_USERS:-RAVI RAHUL AVADHOOT YOGESH KHUSHI NAVEEN GAURAV MITESH ANCHAL ANURAG}"
 DEVOPS_LIB="${DEVOPS_LIB:-PIODEVOPS}"
 JENKINS_PORT="${JENKINS_PORT:-9095}"
 DEFAULT_PASSWORD="${DEFAULT_PASSWORD:-welcome}"
@@ -506,7 +506,7 @@ show_usage() {
     echo ""
     echo "Environment Variables:"
     echo "  DEVOPS_USERS      Users to create (default: 'RAVI RAHUL AVADHOOT YOGESH KHUSHI NAVEEN GAURAV')"
-    echo "  DEVOPS_LIB        DevOps library name (default: 'PIODEVOPS')"
+    echo "          DevOps library name (default: 'PIODEVOPS')"
     echo "  JENKINS_PORT      Jenkins port (default: 9095)"
     echo "  DEFAULT_PASSWORD  Default password for users (default: 'welcome')"
     echo ""
@@ -556,7 +556,7 @@ done
 
 log "Starting DevOps environment setup with the following configuration:"
 log "Users to create: ${USERS_ARRAY[*]}"
-log "DevOps library: $DEVOPS_LIB"
+log "DevOps library: $"
 log "Default password: $DEFAULT_PASSWORD"
 if [ "$INSTALL_JENKINS" = true ]; then
     log "Jenkins port: $JENKINS_PORT"
