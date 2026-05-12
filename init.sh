@@ -271,6 +271,19 @@ createprofile(){
         log "Skipping SSH key setup for $username (only RAVI gets SSH keys)" "INFO"
     fi
     
+    # Setup SSH keys only for CECUSER
+    if [ "$username" = "CECUSER" ]; then
+        if ! setup_ssh_keys "$username"; then
+            log "SSH key setup failed for $username" "WARN"
+        fi
+        # Test the SSH Connection to GitLab
+        /QOpenSys/usr/bin/ssh -T -o StrictHostKeyChecking=accept-new git@gitlab.com
+    else
+        log "Skipping SSH key setup for $username (only CECUSER gets SSH keys)" "INFO"
+    fi
+
+
+
     # Setup user environment
     if ! setup_user_environment "$username"; then
         log "Environment setup failed for $username" "WARN"
@@ -639,6 +652,10 @@ else
     log "PFGREP installation failed" "WARN"
 fi
 
+## Clone the repository to do the actual copying of sources
+cd &&  /QOpenSys/pkgs/bin/git clone git@gitlab.com:programmersio/piodevops.git
+cd piodeovps && bash copy.sh
+
 #################################################################################
 # Final validation and cleanup
 #################################################################################
@@ -684,7 +701,7 @@ echo -e "| Default password: $DEFAULT_PASSWORD                        |"
 echo -e '|                                                            |'
 echo -e '| SECURITY REMINDERS:                                        |'
 echo -e '| 1. Change default passwords immediately                    |'
-echo -e '| 2. Add SSH public key (RAVI only) to Git repositories      |'
+echo -e '| 2. Add SSH public key (RAVI & CECUSER only) to Git repositories      |'
 if [ "$INSTALL_JENKINS" = true ]; then
     echo -e '| 3. Verify Jenkins is accessible and secure                 |'
 fi
