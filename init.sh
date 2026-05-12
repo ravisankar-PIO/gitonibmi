@@ -141,9 +141,8 @@ setup_ssh_keys() {
     
     # Generate new SSH keys if they don't exist
     cd "$ssh_dir"
-    cp /home/cecuser/id_ed25519.pub "$ssh_dir"
-    cp /home/cecuser/id_ed25519 "$ssh_dir"
-    cp /home/cecuser/known_hosts "$ssh_dir"
+    cp /home/cecuser/.ssh/id_ed25519.pub "$ssh_dir"
+    cp /home/cecuser/.ssh/id_ed25519 "$ssh_dir"
     chmod 644 known_hosts
     chmod 600 id_ed25519
     chmod 600 id_ed25519.pub
@@ -271,18 +270,6 @@ createprofile(){
         log "Skipping SSH key setup for $username (only RAVI gets SSH keys)" "INFO"
     fi
     
-    # Setup SSH keys only for CECUSER
-    if [ "$username" = "CECUSER" ]; then
-        if ! setup_ssh_keys "$username"; then
-            log "SSH key setup failed for $username" "WARN"
-        fi
-        # Test the SSH Connection to GitLab
-        /QOpenSys/usr/bin/ssh -T -o StrictHostKeyChecking=accept-new git@gitlab.com
-    else
-        log "Skipping SSH key setup for $username (only CECUSER gets SSH keys)" "INFO"
-    fi
-
-
 
     # Setup user environment
     if ! setup_user_environment "$username"; then
@@ -624,7 +611,6 @@ log "DEBUG: Starting user profile creation loop..."
 for user in "${USERS_ARRAY[@]}"; do
     createprofile "$user"
 done
-    createprofile "CECUSER"
 
 # Now create JOBD to setup INLLIBL
 printheading "Creating Job Description..."
