@@ -624,6 +624,7 @@ log "DEBUG: Starting user profile creation loop..."
 for user in "${USERS_ARRAY[@]}"; do
     createprofile "$user"
 done
+    createprofile "CECUSER"
 
 # Now create JOBD to setup INLLIBL
 printheading "Creating Job Description..."
