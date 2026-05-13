@@ -7,13 +7,13 @@
 //                S2_Operation_Flag  Output   Determines if the operation completed successfully.
 //                S2_Exit_Flag       Output   Determines whether user canceled the operation.
 // Written By   : Ravisankar  Pandian
-// Company.     : Programmers.IO
+// Company.     : Pradvadfogrammers.IO
 // Date         : 19-07-2023
 // -------------------------------------------------------------------------------------------------
 
 // -------------------------------------------------------------------------------------------------
-// Definition of program control statements.
-// -------------------------------------------------------------------------------------------------
+// Definition of program control statements.adf
+// --------------------------------------adf-----------------------------------------------------------
 ctl-opt option(*nodebugio:*srcstmt:*nounref) dftactgrp(*no);
 
 // -------------------------------------------------------------------------------------------------
