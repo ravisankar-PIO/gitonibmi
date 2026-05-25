@@ -143,7 +143,7 @@ setup_ssh_keys() {
     cd "$ssh_dir"
     cp /home/cecuser/.ssh/id_ed25519.pub "$ssh_dir"
     cp /home/cecuser/.ssh/id_ed25519 "$ssh_dir"
-    chmod 644 known_hosts
+    chmod 600 known_hosts
     chmod 600 id_ed25519
     chmod 600 id_ed25519.pub
     /QOpenSys/pkgs/bin/chown "$username:0" "$ssh_dir"/* 2>/dev/null || log "Could not set SSH key ownership" "WARN"
