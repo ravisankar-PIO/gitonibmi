@@ -16,7 +16,7 @@
 set +e
 
 # Setup Environment Variables
-USERS_TO_CREATE="${DEVOPS_USERS:-RAVI RAHUL AVADHOOT YOGESH KHUSHI NAVEEN GAURAV MITESH ANCHAL ANURAG SHOBHIT AMAN}"
+USERS_TO_CREATE="${DEVOPS_USERS:-RAVI RAHUL AVADHOOT YOGESH KHUSHI NAVEEN TRISHA MITESH ANCHAL ANURAG SHOBHIT AMAN}"
 DEVOPS_LIB="${DEVOPS_LIB:-PIODEVOPS}"
 JENKINS_PORT="${JENKINS_PORT:-9095}"
 DEFAULT_PASSWORD="${DEFAULT_PASSWORD:-welcome}"
@@ -505,7 +505,7 @@ show_usage() {
     echo "  $0 jenkins sc        # Install Jenkins with Service Commander"
     echo ""
     echo "Environment Variables:"
-    echo "  DEVOPS_USERS      Users to create (default: 'RAVI RAHUL AVADHOOT YOGESH KHUSHI NAVEEN GAURAV')"
+    echo "  DEVOPS_USERS      Users to create (default: 'RAVI RAHUL AVADHOOT YOGESH KHUSHI NAVEEN TRISHA')"
     echo "          DevOps library name (default: 'PIODEVOPS')"
     echo "  JENKINS_PORT      Jenkins port (default: 9095)"
     echo "  DEFAULT_PASSWORD  Default password for users (default: 'welcome')"
